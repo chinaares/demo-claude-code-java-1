@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: demo-claude-code-java-1

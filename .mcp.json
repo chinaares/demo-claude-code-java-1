@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "local-filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "--path", "/Users/yangzb/ai-java/examples/demo-claude-code-java-1"]
+    }
+  }
+}
