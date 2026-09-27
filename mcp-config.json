@@ -9,7 +9,7 @@
     {
       "name": "github-mcp",
       "type": "github",
-      "repo": "",
+      "repo": "chinaares/demo-claude-code-java-1",
       "token_env": "GITHUB_TOKEN",
       "read_only": true
     },

@@ -16,7 +16,7 @@ npx @modelcontextprotocol/server-filesystem --path "/Users/yangzb/ai-java/exampl
 
 ## 2. GitHub MCP (optional)
 - **Purpose**: Efficient issue management, pull request creation, and repository analysis
-- **Repository**: 
+- **Repository**: chinaares/demo-claude-code-java-1
 - **Required**: GITHUB_TOKEN environment variable
 
 ```bash
@@ -24,14 +24,17 @@ export GITHUB_TOKEN=<your-token>
 ```
 - **Add MCP server command**:
 ```
-claude mcp add github --transport http ""
+claude mcp add github --transport http "chinaares/demo-claude-code-java-1"
 ```
 ⚠️ If `GITHUB_TOKEN` is not set, GitHub MCP will not work.
 
-## 3. Local Git MCP (removed)
-- **Status**: ⚠️ Removed on 2026-09-28
-- **Reason**: The package `@modelcontextprotocol/server-git` does not exist on npm
-- **Alternative**: Claude Code has built-in git tools (git status, git log, etc.) that provide equivalent functionality
+## 3. Local Git MCP (optional)
+- **Purpose**: Analyze commit history, blame, logs.
+- **Root directory**: /Users/yangzb/ai-java/examples/demo-claude-code-java-1
+- **Server command**:
+```bash
+npx @modelcontextprotocol/server-git --path "/Users/yangzb/ai-java/examples/demo-claude-code-java-1"
+```
 
 ## Best Practices
 1. Load skills once per session - avoids unnecessary token usage
