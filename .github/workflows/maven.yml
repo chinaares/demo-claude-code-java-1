@@ -14,6 +14,11 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+  security-events: write
+  dependencies: write
+
 jobs:
   build:
 
