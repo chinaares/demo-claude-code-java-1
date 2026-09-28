@@ -2,6 +2,35 @@
 
 > AI-powered development workspace configuration
 
+## 构建与测试
+- 编译: mvn -q compile
+- 全部测试: mvn -q test
+- 单个测试: mvn -q test -Dtest=OrderServiceTest
+
+## 技术栈
+Java 21 / Spring Boot 4.x / JUnit 5 + AssertJ / Maven
+
+## 架构约定
+- 分层: controller → service → repository,禁止跨层调用
+- Controller 只使用 DTO,不暴露 JPA 实体
+- 异常统一由 @RestControllerAdvice 处理
+
+## 工作约定
+- 新功能和 bug 修复必须先写失败测试
+- 不允许为了让测试通过而修改测试断言,除非需求变更并经我确认
+- 每个任务完成后运行 mvn test 并汇报结果
+- 提交信息遵循 Conventional Commits
+
+## Git 约定
+- 分支: feat/ fix/ refactor/ hotfix/ chore/ + issue号-简述;从最新 main 拉出
+- 一个分支只做一类事,重构不与功能/修复混在同一分支或提交
+- 提交信息遵循 Conventional Commits;不要执行 git push、force push、reset --hard
+- 每个提交都应能通过 mvn test
+
+## 禁止事项
+- 不要修改 pom.xml 依赖版本,除非我明确要求
+- 不要删除文件或运行破坏性命令
+
 ## Available Skills
 
 Skills are loaded from `.claude/skills/` (symlinked from claude-code-java).
