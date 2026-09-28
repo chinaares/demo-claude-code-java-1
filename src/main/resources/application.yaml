@@ -1,3 +1,6 @@
 spring:
   application:
     name: demo-claude-code-java-1
+
+app:
+  version: v1.0.0
