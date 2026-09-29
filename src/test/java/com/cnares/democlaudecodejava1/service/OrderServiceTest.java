@@ -3,6 +3,7 @@ package com.cnares.democlaudecodejava1.service;
 import com.cnares.democlaudecodejava1.dto.CreateOrderRequest;
 import com.cnares.democlaudecodejava1.dto.OrderItemRequest;
 import com.cnares.democlaudecodejava1.dto.OrderResponse;
+import com.cnares.democlaudecodejava1.dto.PagedOrderResponse;
 import com.cnares.democlaudecodejava1.exception.InsufficientStockException;
 import com.cnares.democlaudecodejava1.exception.ResourceNotFoundException;
 import com.cnares.democlaudecodejava1.model.Order;
@@ -318,6 +319,98 @@ class OrderServiceTest {
             assertThatThrownBy(() -> orderService.getOrder(999L))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("999");
+        }
+    }
+
+    @Nested
+    @DisplayName("UC-5: 分页查询订单列表")
+    class WhenListingOrdersWithPagination {
+
+        @Test
+        @DisplayName("应返回分页订单列表")
+        void shouldReturnPagedOrders() {
+            // Arrange
+            Product product = new Product("P001", "Test Product", BigDecimal.valueOf(99.99), 100);
+            product.setVersion(0L);
+            Order order1 = new Order();
+            order1.setId(1L);
+            order1.setCustomerId("C001");
+            order1.setStatus(OrderStatus.PENDING);
+            order1.setTotalAmount(BigDecimal.valueOf(99.99));
+            order1.setCreatedAt(Instant.now());
+            OrderLine line1 = new OrderLine(product, 1, BigDecimal.valueOf(99.99));
+            line1.setOrder(order1);
+            order1.getLines().add(line1);
+
+            Order order2 = new Order();
+            order2.setId(2L);
+            order2.setCustomerId("C002");
+            order2.setStatus(OrderStatus.PENDING);
+            order2.setTotalAmount(BigDecimal.valueOf(199.98));
+            order2.setCreatedAt(Instant.now());
+            OrderLine line2 = new OrderLine(product, 2, BigDecimal.valueOf(99.99));
+            line2.setOrder(order2);
+            order2.getLines().add(line2);
+
+            when(orderRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+                    .thenReturn(new org.springframework.data.domain.PageImpl<>(
+                            java.util.List.of(order1, order2), org.springframework.data.domain.PageRequest.of(0, 10), 2));
+
+            // Act
+            PagedOrderResponse response = orderService.getOrders(0, 10, null);
+
+            // Assert
+            assertThat(response).isNotNull();
+            assertThat(response.getOrders()).hasSize(2);
+            assertThat(response.getPage()).isEqualTo(0);
+            assertThat(response.getSize()).isEqualTo(10);
+            assertThat(response.getTotalElements()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("应按状态筛选订单")
+        void shouldFilterOrdersByStatus() {
+            // Arrange
+            Product product = new Product("P001", "Test Product", BigDecimal.valueOf(99.99), 100);
+            product.setVersion(0L);
+            Order pendingOrder = new Order();
+            pendingOrder.setId(1L);
+            pendingOrder.setCustomerId("C001");
+            pendingOrder.setStatus(OrderStatus.PENDING);
+            pendingOrder.setTotalAmount(BigDecimal.valueOf(99.99));
+            pendingOrder.setCreatedAt(Instant.now());
+            OrderLine line = new OrderLine(product, 1, BigDecimal.valueOf(99.99));
+            line.setOrder(pendingOrder);
+            pendingOrder.getLines().add(line);
+
+            when(orderRepository.findByStatus(eq(OrderStatus.PENDING), any(org.springframework.data.domain.Pageable.class)))
+                    .thenReturn(new org.springframework.data.domain.PageImpl<>(
+                            java.util.List.of(pendingOrder), org.springframework.data.domain.PageRequest.of(0, 10), 1));
+
+            // Act
+            PagedOrderResponse response = orderService.getOrders(0, 10, OrderStatus.PENDING);
+
+            // Assert
+            assertThat(response).isNotNull();
+            assertThat(response.getOrders()).hasSize(1);
+            assertThat(response.getOrders().get(0).getStatus()).isEqualTo(OrderStatus.PENDING);
+        }
+
+        @Test
+        @DisplayName("空结果时应返回空列表")
+        void shouldReturnEmptyList_whenNoOrders() {
+            // Arrange
+            when(orderRepository.findAll(any(org.springframework.data.domain.Pageable.class)))
+                    .thenReturn(new org.springframework.data.domain.PageImpl<>(
+                            java.util.List.of(), org.springframework.data.domain.PageRequest.of(0, 10), 0));
+
+            // Act
+            PagedOrderResponse response = orderService.getOrders(0, 10, null);
+
+            // Assert
+            assertThat(response).isNotNull();
+            assertThat(response.getOrders()).isEmpty();
+            assertThat(response.getTotalElements()).isEqualTo(0);
         }
     }
 }

@@ -4,6 +4,7 @@ import com.cnares.democlaudecodejava1.dto.CreateOrderRequest;
 import com.cnares.democlaudecodejava1.dto.OrderItemRequest;
 import com.cnares.democlaudecodejava1.dto.OrderItemResponse;
 import com.cnares.democlaudecodejava1.dto.OrderResponse;
+import com.cnares.democlaudecodejava1.dto.PagedOrderResponse;
 import com.cnares.democlaudecodejava1.exception.InsufficientStockException;
 import com.cnares.democlaudecodejava1.exception.ResourceNotFoundException;
 import com.cnares.democlaudecodejava1.model.Order;
@@ -12,6 +13,8 @@ import com.cnares.democlaudecodejava1.model.OrderStatus;
 import com.cnares.democlaudecodejava1.model.Product;
 import com.cnares.democlaudecodejava1.repository.OrderRepository;
 import com.cnares.democlaudecodejava1.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +64,21 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
         return toResponse(order);
+    }
+
+    @Override
+    public PagedOrderResponse getOrders(int page, int size, OrderStatus status) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Order> orderPage;
+        if (status != null) {
+            orderPage = orderRepository.findByStatus(status, pageRequest);
+        } else {
+            orderPage = orderRepository.findAll(pageRequest);
+        }
+        List<OrderResponse> orders = orderPage.getContent().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+        return new PagedOrderResponse(orders, page, size, orderPage.getTotalElements());
     }
 
     private Order buildOrder(CreateOrderRequest request) {
