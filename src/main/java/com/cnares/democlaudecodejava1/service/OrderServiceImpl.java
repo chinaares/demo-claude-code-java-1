@@ -56,6 +56,13 @@ public class OrderServiceImpl implements OrderService {
         return toResponse(savedOrder);
     }
 
+    @Override
+    public OrderResponse getOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+        return toResponse(order);
+    }
+
     private Order buildOrder(CreateOrderRequest request) {
         Order order = new Order();
         order.setCustomerId(request.getCustomerId());

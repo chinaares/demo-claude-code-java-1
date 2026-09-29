@@ -5,4 +5,5 @@ import com.cnares.democlaudecodejava1.dto.OrderResponse;
 
 public interface OrderService {
     OrderResponse createOrder(CreateOrderRequest request);
+    OrderResponse getOrder(Long orderId);
 }

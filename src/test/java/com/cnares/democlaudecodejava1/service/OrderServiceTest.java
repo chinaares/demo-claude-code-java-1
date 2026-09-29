@@ -8,6 +8,7 @@ import com.cnares.democlaudecodejava1.exception.ResourceNotFoundException;
 import com.cnares.democlaudecodejava1.model.Order;
 import com.cnares.democlaudecodejava1.model.OrderStatus;
 import com.cnares.democlaudecodejava1.model.Product;
+import com.cnares.democlaudecodejava1.model.OrderLine;
 import com.cnares.democlaudecodejava1.repository.OrderRepository;
 import com.cnares.democlaudecodejava1.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -269,6 +270,54 @@ class OrderServiceTest {
             // Act & Assert
             assertThatThrownBy(() -> orderService.createOrder(multiItemRequest))
                     .isInstanceOf(InsufficientStockException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("UC-4: 查询订单详情")
+    class WhenGettingOrderById {
+
+        @Test
+        @DisplayName("应返回订单详情包含订单行")
+        void shouldReturnOrderWithItems_whenOrderExists() {
+            // Arrange
+            Product product = new Product("P001", "Test Product", BigDecimal.valueOf(99.99), 100);
+            product.setVersion(0L);
+            Order order = new Order();
+            order.setId(1L);
+            order.setCustomerId("C001");
+            order.setStatus(OrderStatus.PENDING);
+            order.setTotalAmount(BigDecimal.valueOf(199.98));
+            order.setCreatedAt(Instant.now());
+            OrderLine line = new OrderLine(product, 2, BigDecimal.valueOf(99.99));
+            line.setOrder(order);
+            order.getLines().add(line);
+
+            when(orderRepository.findById(1L)).thenReturn(java.util.Optional.of(order));
+
+            // Act
+            OrderResponse response = orderService.getOrder(1L);
+
+            // Assert
+            assertThat(response).isNotNull();
+            assertThat(response.getOrderId()).isEqualTo(1L);
+            assertThat(response.getCustomerId()).isEqualTo("C001");
+            assertThat(response.getStatus()).isEqualTo(OrderStatus.PENDING);
+            assertThat(response.getItems()).hasSize(1);
+            assertThat(response.getItems().get(0).getProductId()).isEqualTo("P001");
+            assertThat(response.getItems().get(0).getQuantity()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("订单不存在时应抛出异常")
+        void shouldThrowException_whenOrderNotFound() {
+            // Arrange
+            when(orderRepository.findById(999L)).thenReturn(java.util.Optional.empty());
+
+            // Act & Assert
+            assertThatThrownBy(() -> orderService.getOrder(999L))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("999");
         }
     }
 }
