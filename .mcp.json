@@ -4,6 +4,10 @@
       "command": "npx",
       "args": ["@modelcontextprotocol/server-filesystem", "--path", "/Users/yangzb/ai-java/examples/demo-claude-code-java-1"]
     },
+    "git-local": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "/Users/yangzb/ai-java/examples/demo-claude-code-java-1"]
+    },
     "github": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
